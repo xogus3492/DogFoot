@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="domain.post.dao.BoardPostDAO">
+
+    <select id="boardPostSelectAll" parameterType="boardpostvo" resultType="boardpostvo">
+        <![CDATA[
+     SELECT * FROM (
+    SELECT POSTID, TITLE, USERID, CREATEDDATE, VIEWCOUNT, TABLENAME
+    FROM (
+        SELECT BOARDFREEID AS POSTID, TITLE, USERID, TO_CHAR(CREATEDDATE, 'YYYY-MM-DD') AS CREATEDDATE, VIEWCOUNT, 'BOARDFREE' AS TABLENAME
+        FROM BOARDFREE
+        WHERE DELETEYN = 'N'
+        UNION ALL
+        SELECT BOARDJOBID AS POSTID, TITLE, USERID, TO_CHAR(CREATEDDATE, 'YYYY-MM-DD') AS CREATEDDATE, VIEWCOUNT, 'BOARDJOB' AS TABLENAME
+        FROM BOARDJOB
+        WHERE DELETEYN = 'N'
+        UNION ALL
+        SELECT BOARDQUESTIONID AS POSTID, TITLE, USERID, TO_CHAR(CREATEDDATE, 'YYYY-MM-DD') AS CREATEDDATE, VIEWCOUNT, 'BOARDQUESTION' AS TABLENAME
+        FROM BOARDQUESTION
+        WHERE DELETEYN = 'N'
+        ORDER BY VIEWCOUNT DESC
+    )
+)
+WHERE ROWNUM <= 10
+
+        ]]>
+    </select>
+    
+</mapper>

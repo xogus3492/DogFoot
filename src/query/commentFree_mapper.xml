@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+          
+<mapper namespace="domain.free.dao.CommentFreeDAO">
+
+<insert id="commentFreeInsert" parameterType="commentfreevo">
+
+	INSERT INTO COMMENTFREE(COMMENTFREEID, CONTENT,USERID,
+						BOARDFREEID,DELETEYN,CREATEDDATE,
+						MODIFIEDDATE)
+						VALUES (COMMENTFREE_SEQ.NEXTVAL,
+								#{content},
+								#{userid},
+								#{boardfreeid},
+								'N',
+								SYSDATE,
+								SYSDATE)	
+</insert>
+<select id="commentFreeSelectAll" parameterType="commentfreevo" resultType="commentfreevo">
+	
+	SELECT 	A.COMMENTFREEID 		COMMENTFREEID
+		       ,A.CONTENT  		CONTENT
+		       ,A.USERID 		USERID
+		       ,A.BOARDFREEID 	BOARDFREEID	   
+	           ,A.DELETEYN 	DELETEYN
+	           ,A.CREATEDDATE 	CREATEDDATE
+	           ,A.MODIFIEDDATE 	MODIFIEDDATE
+		FROM 	COMMENTFREE A
+		WHERE 	DELETEYN = 'N' 
+		AND 	A.BOARDFREEID = #{boardfreeid}
+		ORDER BY A.CREATEDDATE DESC
+</select>
+
+<update id="commentFreeDelete" parameterType="commentfreevo">
+	
+	UPDATE 	COMMENTFREE 
+	SET 	DELETEYN = 'Y', 
+			CREATEDDATE = SYSDATE
+	WHERE 	DELETEYN = 'N' 
+	AND 	COMMENTFREEID = #{commentfreeid}
+</update> 
+</mapper>
+          

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+          
+<mapper namespace="domain.question.dao.BoardQuestionDAO">
+
+<insert id="boardQuestionInsert" parameterType="boardquestionvo" >
+ 
+	INSERT INTO BOARDQUESTION (BOARDQUESTIONID
+						 ,TITLE
+						 ,CONTENT
+						 ,VIEWCOUNT
+						 ,PICTUREFILE
+						 ,USERID
+						 ,DELETEYN
+						 ,CREATEDDATE
+						 ,MODIFIEDDATE)
+            		VALUES( BOARDQUESTION_SEQ.NEXTVAL,
+            				#{title}, 
+            				#{content}, 
+            				#{viewcount}, 
+            				#{picturefile}, 
+            				#{userid},             					
+            				'N', 
+            				SYSDATE, 
+            				SYSDATE)
+</insert>
+
+<select id="boardQuestionSelectAll" parameterType="boardquestionvo" resultType="boardquestionvo">	
+	SELECT * FROM (
+		SELECT 	A.BOARDQUESTIONID 	BOARDQUESTIONID
+		       ,A.TITLE 		TITLE
+		       ,A.CONTENT 		CONTENT
+		       ,A.VIEWCOUNT 	VIEWCOUNT
+		       ,A.PICTUREFILE 	PICTUREFILE
+		       ,A.USERID 		USERID		   
+		       ,A.DELETEYN 	DELETEYN
+		       ,TO_CHAR(A.CREATEDDATE, 'YYYY-MM-DD') CREATEDDATE
+		       ,TO_CHAR(A.MODIFIEDDATE, 'YYYY-MM-DD') MODIFIEDDATE
+		       <!--  ? : 페이지 사이즈 : pageSize  -->
+		       ,CEIL(ROW_NUMBER() OVER(ORDER BY A.BOARDQUESTIONID)/ #{pageSize} ) pageSize		
+			   ,COUNT(A.BOARDQUESTIONID) OVER() AS totalCount 	      
+		FROM 	BOARDQUESTION A
+		WHERE 	A.DELETEYN = 'N' 	
+	<if test="searchFilter=='key2'">
+	<![CDATA[AND A.TITLE LIKE '%' || #{keyword, jdbcType=VARCHAR} || '%' ]]>
+	</if>	
+	<if test="searchFilter=='key3'">
+	<![CDATA[AND A.USERID LIKE '%' || #{keyword, jdbcType=VARCHAR} || '%' ]]>
+	</if>
+	ORDER BY A.CREATEDDATE DESC
+	    <!--  ? : 현재 페이지 : curPage -->
+	) WHERE pageSize = #{curPage}
+	
+</select>
+
+<select id="boardQuestionSelect" parameterType="boardquestionvo" resultType="boardquestionvo">	
+	
+		SELECT 	A.BOARDQUESTIONID 	BOARDQUESTIONID
+		       ,A.TITLE 		TITLE
+		       ,A.CONTENT 		CONTENT
+		       ,A.VIEWCOUNT 	VIEWCOUNT
+		       ,A.PICTUREFILE 	PICTUREFILE
+		       ,A.USERID 		USERID		   
+		       ,A.DELETEYN 		DELETEYN
+		       ,TO_CHAR(A.CREATEDDATE, 'YYYY-MM-DD') CREATEDDATE
+		       ,TO_CHAR(A.MODIFIEDDATE, 'YYYY-MM-DD') MODIFIEDDATE
+		FROM 	BOARDQUESTION A		
+		WHERE 	A.DELETEYN = 'N'
+		AND     A.BOARDQUESTIONID = #{boardquestionid}
+		
+		<!-- 좋아요 사용 x 
+			FROM 	BOARDJOB A
+			FULL OUTER JOIN BOARDJOB B
+			ON   A.BOARDJOBID = B.BOARDJOBID
+			WHERE 	A.DELETEYN = 'Y' 
+			AND     A.BOARDJOBID = #{boardjobid}	
+		 -->  	
+
+</select>
+
+<!-- 비밀번호 체크 x
+<select id="kosBoardPwCheck" parameterType="kosboardvo" resultType="kosboardvo">	
+	
+		SELECT 	A.BNUM 		BNUM		    
+		       ,A.BPW 		BPW		   		     
+		FROM 	SPRING_BOARD A
+		WHERE 	A.DELETEYN = 'Y' 
+		AND     A.BNUM = #{bnum}	
+		AND     A.BPW = #{bpw}
+		
+</select>
+ -->
+ 
+<update id="boardQuestionViewcount" parameterType="boardquestionvo" >
+ 
+	UPDATE  BOARDQUESTION 
+		SET VIEWCOUNT = (SELECT NVL(MAX(VIEWCOUNT), 0) + 1 FROM BOARDQUESTION WHERE DELETEYN = 'N' AND BOARDQUESTIONID = #{boardquestionid})
+		   <!--,UPDATEDATE = SYSDATE  -->
+	WHERE   DELETEYN = 'N'
+	AND     BOARDQUESTIONID = #{boardquestionid}	
+		   
+</update>
+
+<update id="boardQuestionUpdate" parameterType="boardquestionvo" >
+
+	UPDATE  BOARDQUESTION
+   	   SET	TITLE 			= #{title}
+   	   	   ,CONTENT 		= #{content}
+	  	   ,MODIFIEDDATE 	= SYSDATE
+	WHERE   DELETEYN		= 'N'
+	AND     BOARDQUESTIONID = #{boardquestionid}	
+</update>
+
+<update id="boardQuestionDelete" parameterType="boardquestionvo" >
+
+	UPDATE  BOARDQUESTION
+   	   SET	DELETEYN 		= 'Y'
+      	   ,MODIFIEDDATE  	= SYSDATE
+	WHERE  	DELETEYN    	= 'N'
+	AND    	BOARDQUESTIONID = #{boardquestionid}
+	
+</update>
+</mapper>      

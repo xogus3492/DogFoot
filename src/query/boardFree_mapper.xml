@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper   namespace="domain.free.dao.BoardFreeDAO">
+
+<insert id="boardFreeInsert" parameterType="boardfreevo">
+   
+   INSERT INTO BOARDFREE (BOARDFREEID, TITLE, CONTENT, VIEWCOUNT, PICTUREFILE, USERID, DELETEYN, CREATEDDATE, MODIFIEDDATE)
+VALUES (BOARDFREE_SEQ.NEXTVAL, #{title}, #{content}, #{viewcount}, #{picturefile}, #{userid}, 'N', SYSDATE, SYSDATE)
+
+
+</insert>
+<select id="boardFreeSelectAll" parameterType="boardfreevo" resultType="boardfreevo">
+       SELECT * FROM (
+      SELECT    A.BOARDFREEID       BOARDFREEID
+             ,A.TITLE          TITLE
+             ,A.CONTENT          CONTENT
+             ,A.VIEWCOUNT       VIEWCOUNT
+             ,A.PICTUREFILE       PICTUREFILE
+             ,A.USERID          USERID         
+             ,A.DELETEYN          DELETEYN
+             ,TO_CHAR(A.CREATEDDATE, 'YYYY-MM-DD') CREATEDDATE
+             ,TO_CHAR(A.MODIFIEDDATE, 'YYYY-MM-DD') MODIFIEDDATE       
+             <!--  ? : 페이지 사이즈 : pageSize  -->
+             ,CEIL(ROW_NUMBER() OVER(ORDER BY A.BOARDFREEID)/ #{pageSize} ) pageSize      
+            ,COUNT(A.BOARDFREEID) OVER() AS totalCount          
+      FROM    BOARDFREE A
+      WHERE    A.DELETEYN = 'N'    
+      <if test="searchFilter=='key2'">
+      <![CDATA[AND A.TITLE LIKE '%' || #{keyword, jdbcType=VARCHAR} || '%']]>      
+      </if>
+      <if test="searchFilter=='key3'">
+      <![CDATA[AND A.USERID LIKE '%' || #{keyword, jdbcType=VARCHAR} || '%']]>
+      </if>            
+      ORDER BY A.CREATEDDATE DESC
+       <!--  ? : 현재 페이지 : curPage -->
+      )WHERE pageSize = #{curPage}
+   
+</select>
+
+<select id="boardFreeSelect" parameterType="boardfreevo" resultType="boardfreevo">
+   SELECT    A.BOARDFREEID       BOARDFREEID
+             ,A.TITLE       TITLE
+             ,A.CONTENT       CONTENT
+             ,A.VIEWCOUNT    VIEWCOUNT
+             ,A.PICTUREFILE    PICTUREFILE
+             ,A.USERID       USERID         
+             ,A.DELETEYN    DELETEYN
+             ,TO_CHAR(A.CREATEDDATE, 'YYYY-MM-DD') CREATEDDATE
+             ,TO_CHAR(A.MODIFIEDDATE, 'YYYY-MM-DD') MODIFIEDDATE
+             FROM BOARDFREE A
+             WHERE A.DELETEYN = 'N'     
+             AND A.BOARDFREEID = #{boardfreeid}
+</select>
+
+<update id="boardFreeUpdate" parameterType="boardfreevo" >
+   UPDATE  BOARDFREE
+         SET   CONTENT    = #{content}
+           ,MODIFIEDDATE    = SYSDATE
+   WHERE   DELETEYN = 'N'
+   AND     BOARDFREEID = #{boardfreeid}
+</update>
+
+<update id="boardFreeDelete" parameterType="boardfreevo">
+   
+   UPDATE  BOARDFREE
+         SET   DELETEYN    = 'Y'
+           ,MODIFIEDDATE = SYSDATE
+   WHERE   DELETEYN = 'N'
+   AND     BOARDFREEID = #{boardfreeid}
+   
+</update> 
+
+<update id="boardFreeViewCount" parameterType="boardfreevo" >
+ 
+   UPDATE  BOARDFREE 
+      SET VIEWCOUNT = (SELECT NVL(MAX(VIEWCOUNT), 0) + 1 FROM BOARDFREE WHERE DELETEYN = 'N' AND BOARDFREEID = #{boardfreeid})
+         <!--,UPDATEDATE = SYSDATE  -->
+   WHERE   DELETEYN = 'N'
+   AND     BOARDFREEID = #{boardfreeid}         
+</update>
+
+</mapper>

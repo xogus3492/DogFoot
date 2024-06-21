@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="domain.user.dao.UserDAO">
+
+<insert id="insert" parameterType="uservo">
+	INSERT INTO "USER" (USERID, EMAIL, PASSWORD,
+						NAME, ROLE, TEL,
+						GENDER, INFO, BIRTHDAY,
+						ZONECODE, ROADADDRESS, DETAILADDRESS,
+						JIBUNADDRESS, PHOTO, DELETEYN,
+						CREATEDDATE, MODIFIEDDATE)
+    VALUES( USER_SEQ.NEXTVAL, #{email}, #{password}, 
+            #{name}, 'USER', #{tel},
+            #{gender}, #{info}, #{birthDay},
+            #{zoneCode}, #{roadAddress}, #{detailAddress},
+            #{jibunAddress}, #{photo}, 'N',
+            SYSDATE, SYSDATE )
+</insert>
+
+<select id="selectByEmailOrPassword" parameterType="uservo" resultType="uservo">
+	SELECT *	
+	FROM "USER"
+	WHERE DELETEYN = 'N' 
+		AND EMAIL = #{email,jdbcType=VARCHAR} 
+		AND PASSWORD = #{password,jdbcType=VARCHAR}
+</select>
+
+<select id="selectByEmail" parameterType="uservo" resultType="uservo">
+	SELECT *	
+	FROM "USER"
+	WHERE DELETEYN = 'N'
+		AND EMAIL = #{email,jdbcType=VARCHAR}
+</select>
+
+<update id="update" parameterType="uservo" >
+	UPDATE  "USER"
+   	   SET  EMAIL = #{email},
+   	   		GENDER = #{gender},
+   	   		BIRTHDAY = #{birthDay},
+   	   		JIBUNADDRESS = #{jibunAddress},
+   	   		INFO = #{info},
+	  	    MODIFIEDDATE = SYSDATE
+	WHERE   DELETEYN = 'N'
+	AND     USERID = #{userId}
+</update>
+
+</mapper>

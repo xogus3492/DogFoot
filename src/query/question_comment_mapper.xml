@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+          
+<mapper namespace="domain.question.dao.CommentQuestionDAO">
+
+<insert id="commentQuestionInsert" parameterType="commentquestionvo" >
+ 
+	INSERT INTO COMMENTQUESTION( 	
+								COMMENTQUESTIONID, 
+								CONTENT, 
+	                           	USERID, 
+	                           	BOARDQUESTIONID, 
+	                           	DELETEYN,
+	                           	CREATEDDATE,
+	                           	MODIFIEDDATE
+	                        ) 
+	                  VALUES
+	                  		( 	
+	                  			COMMENTQUESTION_SEQ.NEXTVAL,
+	                  			#{content}, 
+	                  			#{userid},
+	                          	#{boardquestionid},  
+	                          	'N',
+	                          	SYSDATE,
+	                          	SYSDATE
+	                        )
+</insert>
+
+
+<select id="commentQuestionSelectAll" parameterType="commentquestionvo" resultType="commentquestionvo">
+	
+		SELECT 	A.COMMENTQUESTIONID 		COMMENTQUESTIONID
+		       ,A.CONTENT  		CONTENT
+		       ,A.USERID 		USERID
+		       ,A.BOARDQUESTIONID 	BOARDQUESTIONID	   
+	           ,A.CREATEDDATE 	CREATEDDATE
+	           ,A.MODIFIEDDATE 	MODIFIEDDATE
+		FROM 	COMMENTQUESTION A
+		WHERE 	DELETEYN = 'N' 
+		AND 	A.BOARDQUESTIONID = #{boardquestionid}
+		ORDER BY A.CREATEDDATE DESC
+</select>
+
+<update id="commentQuestionDelete" parameterType="commentquestionvo">
+	
+	UPDATE 	COMMENTQUESTION 
+	SET 	DELETEYN = 'Y', 
+			MODIFIEDDATE = SYSDATE
+	WHERE 	DELETEYN = 'N' 
+	AND 	COMMENTQUESTIONID = #{commentquestionid}
+	
+</update>
+
+</mapper>      

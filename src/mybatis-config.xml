@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" 
+		  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<typeAliases>
+		<!-- 자유 게시판 -->
+		<typeAlias type="domain.free.vo.BoardFreeVO" alias="boardfreevo"/>
+		<!-- 자유 게시판 댓글 -->
+		<typeAlias type="domain.free.vo.CommentFreeVO" alias="commentfreevo"/>
+		
+		<!-- 취업 게시판 -->
+		<typeAlias type="domain.job.vo.BoardJobVO" alias="boardjobvo"/>
+		<!-- 취업 게시판 댓글 -->
+		<typeAlias type="domain.job.vo.CommentJobVO" alias="commentjobvo"/>
+		
+		<!-- 회원 -->
+		<typeAlias type="domain.user.vo.UserVO" alias="uservo"/>
+		
+		<!-- 질문 게시판 -->
+		<typeAlias type="domain.question.vo.BoardQuestionVO" alias="boardquestionvo"/>
+		<!-- 질문 게시판 댓글 -->
+		<typeAlias type="domain.question.vo.CommentQuestionVO" alias="commentquestionvo"/>
+		
+		<!-- 인기 게시판 -->
+		<typeAlias type="domain.post.vo.BoardPostVO" alias="boardpostvo"/>
+				
+	</typeAliases>
+</configuration>

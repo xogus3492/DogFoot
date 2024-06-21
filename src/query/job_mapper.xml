@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+          
+<mapper namespace="domain.job.dao.BoardJobDAO">
+
+<insert id="boardJobInsert" parameterType="boardjobvo" >
+ 
+	INSERT INTO BOARDJOB (	 BOARDJOBID
+						 	,TITLE
+						 	,CONTENT
+						 	,VIEWCOUNT
+						 	,PICTUREFILE
+						 	,USERID
+						 	,DELETEYN
+						 	,CREATEDDATE
+						 	,MODIFIEDDATE	)
+            			VALUES( BOARDJOB_SEQ.NEXTVAL,
+            					#{title}, 
+            					#{content}, 
+            					#{viewcount}, 
+            					#{picturefile}, 
+            					#{userid},             					
+            					'N', 
+            					SYSDATE, 
+            					SYSDATE)
+</insert>
+
+<select id="boardJobSelectAll" parameterType="boardjobvo" resultType="boardjobvo">	
+	SELECT * FROM (
+ 		SELECT 	A.BOARDJOBID 	BOARDJOBID
+		       ,A.TITLE 		TITLE
+		       ,A.CONTENT 		CONTENT
+		       ,A.VIEWCOUNT 	VIEWCOUNT
+		       ,A.PICTUREFILE 	PICTUREFILE
+		       ,A.USERID 		USERID		   
+		       ,A.DELETEYN 	DELETEYN
+		       ,TO_CHAR(A.CREATEDDATE, 'YYYY-MM-DD') CREATEDDATE
+		       ,TO_CHAR(A.MODIFIEDDATE, 'YYYY-MM-DD') MODIFIEDDATE
+		       <!--  ? : 페이지 사이즈 : pageSize  -->
+		       ,CEIL(ROW_NUMBER() OVER(ORDER BY A.BOARDJOBID)/ #{pageSize} ) pageSize		
+			   ,COUNT(A.BOARDJOBID) OVER() AS totalCount 	      
+		FROM 	BOARDJOB A
+		WHERE 	A.DELETEYN = 'N'
+		<if test="searchFilter=='key2'">
+     	<![CDATA[AND A.TITLE LIKE '%' || #{keyword, jdbcType=VARCHAR} || '%']]>      
+      	</if>
+      	<if test="searchFilter=='key3'">
+      	<![CDATA[AND A.USERID LIKE '%' || #{keyword, jdbcType=VARCHAR} || '%']]>
+      	</if>	
+		ORDER BY A.CREATEDDATE DESC
+	    <!--  ? : 현재 페이지 : curPage -->
+	) WHERE pageSize = #{curPage}
+		
+	
+</select>
+
+<select id="boardJobSelect" parameterType="boardjobvo" resultType="boardjobvo">	
+	
+		SELECT 	A.BOARDJOBID 	BOARDJOBID
+		       ,A.TITLE 		TITLE
+		       ,A.CONTENT 		CONTENT
+		       ,A.VIEWCOUNT 	VIEWCOUNT
+		       ,A.PICTUREFILE 	PICTUREFILE
+		       ,A.USERID 		USERID		   
+		       ,A.DELETEYN 		DELETEYN
+		       ,TO_CHAR(A.CREATEDDATE, 'YYYY-MM-DD') CREATEDDATE
+		       ,TO_CHAR(A.MODIFIEDDATE, 'YYYY-MM-DD') MODIFIEDDATE
+		FROM 	BOARDJOB A		
+		WHERE 	A.DELETEYN = 'N'
+		AND     A.BOARDJOBID = #{boardjobid}
+		
+		<!-- 좋아요 사용 x 
+			FROM 	BOARDJOB A
+			FULL OUTER JOIN BOARDJOB B
+			ON   A.BOARDJOBID = B.BOARDJOBID
+			WHERE 	A.DELETEYN = 'Y' 
+			AND     A.BOARDJOBID = #{boardjobid}	
+		 -->  	
+
+</select>
+
+<!-- 비밀번호 체크 x
+<select id="kosBoardPwCheck" parameterType="kosboardvo" resultType="kosboardvo">	
+	
+		SELECT 	A.BNUM 		BNUM		    
+		       ,A.BPW 		BPW		   		     
+		FROM 	SPRING_BOARD A
+		WHERE 	A.DELETEYN = 'Y' 
+		AND     A.BNUM = #{bnum}	
+		AND     A.BPW = #{bpw}
+		
+</select>
+ -->
+ 
+<update id="boardJobViewcount" parameterType="boardjobvo" >
+ 
+	UPDATE  BOARDJOB 
+		SET VIEWCOUNT = (SELECT NVL(MAX(VIEWCOUNT), 0) + 1 FROM BOARDJOB WHERE DELETEYN = 'N' AND BOARDJOBID = #{boardjobid})
+		   <!--,UPDATEDATE = SYSDATE  -->
+	WHERE   DELETEYN = 'N'
+	AND     BOARDJOBID = #{boardjobid}	
+		   
+</update>
+
+<update id="boardJobUpdate" parameterType="boardjobvo" >
+
+	UPDATE  BOARDJOB
+   	   SET	TITLE 			= #{title}
+   	   	   ,CONTENT 		= #{content}
+	  	   ,MODIFIEDDATE 	= SYSDATE
+	WHERE   DELETEYN		= 'N'
+	AND     BOARDJOBID = #{boardjobid}	
+</update>
+
+<update id="boardJobDelete" parameterType="boardjobvo" >
+
+	UPDATE  BOARDJOB
+   	   SET	DELETEYN 		= 'Y'
+      	   ,MODIFIEDDATE  	= SYSDATE
+	WHERE  	DELETEYN    	= 'N'
+	AND    	BOARDJOBID = #{boardjobid}
+	
+</update>
+</mapper>      
